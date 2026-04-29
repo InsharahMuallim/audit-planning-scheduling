@@ -505,3 +505,61 @@ PII (Personally Identifiable Information) is any data that could identify a spec
 ---
 
 *Last updated: Day 9 — 28 April 2026 | AI Developer 3*
+
+---
+
+## 10. Week 2 Security Sign-Off (Day 10)
+
+**Sign-Off Date:** 28 April 2026
+**Signed Off By:** AI Developer 3 — Insha
+**Sprint Week:** Week 2
+
+---
+
+### Sign-Off Checklist
+
+| Security Requirement | Test Performed | Result |
+|---------------------|----------------|--------|
+| Rate limiting — 30 req/min default | Sent 35 requests, got 429 on 31st | PASS |
+| Rate limiting — 10 req/min on /generate-report | Sent 15 requests, got 429 on 11th | PASS |
+| 429 response contains retry_after field | Checked response body | PASS |
+| Prompt injection blocked | Sent 5 injection patterns, all returned 400 | PASS |
+| HTML injection stripped | Sent script tags, all stripped | PASS |
+| Safe input accepted | Sent 3 normal inputs, all returned 200 | PASS |
+| X-Content-Type-Options header present | Checked /health response headers | PASS |
+| X-Frame-Options header present | Checked /health response headers | PASS |
+| Content-Security-Policy header present | Checked /health response headers | PASS |
+| X-XSS-Protection header present | Checked /health response headers | PASS |
+| No PII in logs | PII audit script run — 0 issues found | PASS |
+| No hardcoded secrets | Code review completed | PASS |
+
+---
+
+### Week 2 Test Results
+
+| Test Category | Tests Run | Passed | Failed |
+|---------------|-----------|--------|--------|
+| Rate Limiting | 4 | 4 | 0 |
+| Injection Rejection | 5 | 5 | 0 |
+| Safe Input Acceptance | 3 | 3 | 0 |
+| Security Headers | 4 | 4 | 0 |
+| **TOTAL** | **16** | **16** | **0** |
+
+**Pass Rate: 100%**
+
+---
+
+### Sign-Off Statement
+
+> I, AI Developer 3 (Insha), hereby confirm that all Week 2 security
+> requirements for Tool-21 have been tested and verified as of 28 April 2026.
+> JWT enforcement is handled by the Java backend (Spring Security).
+> Rate limiting, input sanitisation, and security headers are all
+> working correctly in the Flask AI service.
+
+**Signed:** AI Developer 3 — InsharahMuallim
+**Date:** 28 April 2026
+
+---
+
+*Last updated: Day 10 — 28 April 2026 | AI Developer 3*
