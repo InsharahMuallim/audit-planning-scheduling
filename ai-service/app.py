@@ -1,46 +1,55 @@
 """
-app.py — Flask Entry Point with Security Headers + Rate Limiting
+app.py - Flask Entry Point with flask-talisman Security Headers
 Tool-21: Audit Planning and Scheduling
-AI Developer 3 — Day 8 Task
+AI Developer 3 - Day 12 Task
 """
 
 from flask import Flask, jsonify, request
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
+from flask_talisman import Talisman
 from routes.sanitisation import sanitise_input
 
 app = Flask(__name__)
 
 
 # ─────────────────────────────────────────────
-# 1. ADD SECURITY HEADERS TO EVERY RESPONSE
-# This fixes all ZAP findings from Day 7
+# 1. FLASK-TALISMAN — All Security Headers
+# Fixes all remaining ZAP findings!
+# ─────────────────────────────────────────────
+csp = {
+    'default-src': "'self'",
+    'script-src': "'self'",
+    'style-src': "'self'",
+    'img-src': "'self' data:",
+    'font-src': "'self'",
+}
+
+Talisman(
+    app,
+    force_https=False,          # Keep False for local development
+    strict_transport_security=False,  # Keep False for local development
+    content_security_policy=csp,
+    x_content_type_options=True,      # Fixes ZAP Finding 4
+    x_xss_protection=True,            # Extra XSS protection
+    frame_options='DENY',             # Fixes clickjacking
+    referrer_policy='strict-origin-when-cross-origin',
+)
+
+
+# ─────────────────────────────────────────────
+# 2. HIDE SERVER VERSION
+# Fixes ZAP Finding 3
 # ─────────────────────────────────────────────
 @app.after_request
-def add_security_headers(response):
-    # Fixes Finding 4 — X-Content-Type-Options Missing
-    response.headers['X-Content-Type-Options'] = 'nosniff'
-
-    # Fixes Finding 1 — Content Security Policy Not Set
-    response.headers['Content-Security-Policy'] = "default-src 'self'"
-
-    # Fixes ZAP — X-Frame-Options Missing
-    # Stops your app being loaded inside another website (clickjacking)
-    response.headers['X-Frame-Options'] = 'DENY'
-
-    # Extra security headers (best practice)
-    response.headers['X-XSS-Protection'] = '1; mode=block'
-    response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
-
-    # Fixes Finding 3 — Hide Flask version from Server header
+def hide_server_info(response):
     response.headers['Server'] = 'Tool-21-AI-Service'
-
     return response
 
 
 # ─────────────────────────────────────────────
-# 2. SETUP FLASK-LIMITER
-# Default limit: 30 requests per minute per IP
+# 3. FLASK-LIMITER
+# Default: 30 req/min
 # ─────────────────────────────────────────────
 limiter = Limiter(
     get_remote_address,
@@ -51,14 +60,13 @@ limiter = Limiter(
 
 
 # ─────────────────────────────────────────────
-# 3. CUSTOM ERROR HANDLER FOR 429
-# Returns clear error message with retry_after
+# 4. CUSTOM 429 ERROR HANDLER
 # ─────────────────────────────────────────────
 @app.errorhandler(429)
 def rate_limit_exceeded(e):
     return jsonify({
         "error": "Too Many Requests",
-        "message": "You have exceeded the allowed request limit. Please slow down.",
+        "message": "You have exceeded the allowed request limit.",
         "retry_after": 60,
         "retry_after_unit": "seconds",
         "status": 429
@@ -66,8 +74,7 @@ def rate_limit_exceeded(e):
 
 
 # ─────────────────────────────────────────────
-# 4. HEALTH CHECK ENDPOINT
-# No rate limit on health check
+# 5. HEALTH CHECK
 # ─────────────────────────────────────────────
 @app.route("/health", methods=["GET"])
 @limiter.exempt
@@ -75,21 +82,18 @@ def health():
     return jsonify({
         "status": "ok",
         "message": "AI service is running",
-        "security_headers": {
-            "X-Content-Type-Options": "nosniff",
-            "X-Frame-Options": "DENY",
-            "Content-Security-Policy": "default-src 'self'",
-            "X-XSS-Protection": "1; mode=block"
-        },
-        "rate_limits": {
-            "default": "30 requests per minute",
-            "generate_report": "10 requests per minute"
+        "security": {
+            "talisman": "enabled",
+            "csp": "enabled",
+            "x_content_type_options": "nosniff",
+            "x_frame_options": "DENY",
+            "rate_limiting": "30 req/min default"
         }
     }), 200
 
 
 # ─────────────────────────────────────────────
-# 5. DESCRIBE ENDPOINT — 30 req/min
+# 6. DESCRIBE ENDPOINT
 # ─────────────────────────────────────────────
 @app.route("/describe", methods=["POST"])
 @sanitise_input
@@ -103,7 +107,7 @@ def describe():
 
 
 # ─────────────────────────────────────────────
-# 6. RECOMMEND ENDPOINT — 30 req/min
+# 7. RECOMMEND ENDPOINT
 # ─────────────────────────────────────────────
 @app.route("/recommend", methods=["POST"])
 @sanitise_input
@@ -117,7 +121,7 @@ def recommend():
 
 
 # ─────────────────────────────────────────────
-# 7. GENERATE REPORT — Strict 10 req/min
+# 8. GENERATE REPORT — Strict 10 req/min
 # ─────────────────────────────────────────────
 @app.route("/generate-report", methods=["POST"])
 @limiter.limit("10 per minute")
@@ -132,7 +136,7 @@ def generate_report():
 
 
 # ─────────────────────────────────────────────
-# 8. CATEGORISE ENDPOINT — 30 req/min
+# 9. CATEGORISE ENDPOINT
 # ─────────────────────────────────────────────
 @app.route("/categorise", methods=["POST"])
 @sanitise_input
@@ -146,7 +150,7 @@ def categorise():
 
 
 # ─────────────────────────────────────────────
-# 9. TEST SANITISATION ENDPOINT
+# 10. TEST SANITISATION ENDPOINT
 # ─────────────────────────────────────────────
 @app.route("/test-sanitise", methods=["POST"])
 @sanitise_input
