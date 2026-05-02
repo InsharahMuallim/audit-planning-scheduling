@@ -188,3 +188,75 @@ I, AI Developer 3 (InsharahMuallim), hereby confirm that:
 ---
 
 *This document is complete and ready for Demo Day — 9 May 2026*
+
+---
+
+## 10. Final Security Checklist (Day 15)
+
+### AI Service Security Checklist
+
+| # | Item | Done |
+|---|------|------|
+| 1 | Input sanitisation middleware implemented | YES |
+| 2 | HTML stripping working on all endpoints | YES |
+| 3 | Prompt injection patterns detected and blocked | YES |
+| 4 | Rate limiting — 30 req/min default | YES |
+| 5 | Rate limiting — 10 req/min on /generate-report | YES |
+| 6 | HTTP 429 returned with retry_after on breach | YES |
+| 7 | X-Content-Type-Options header present | YES |
+| 8 | X-Frame-Options header present | YES |
+| 9 | Content-Security-Policy header present | YES |
+| 10 | X-XSS-Protection header present | YES |
+| 11 | Server version hidden from response headers | YES |
+| 12 | No hardcoded secrets in any file | YES |
+| 13 | .env file in .gitignore | YES |
+| 14 | All secrets loaded from environment variables | YES |
+| 15 | PII audit completed — zero issues found | YES |
+| 16 | OWASP ZAP baseline scan completed | YES |
+| 17 | OWASP ZAP active scan completed | YES |
+| 18 | Zero Critical findings remaining | YES |
+| 19 | Zero High findings remaining | YES |
+| 20 | All Medium findings resolved | YES |
+| 21 | Residual Low risks documented and accepted | YES |
+| 22 | Week 1 security tests — 100% pass | YES |
+| 23 | Week 2 security sign-off — 92% pass | YES |
+| 24 | Full stack security test — 88% pass | YES |
+| 25 | AiServiceClient.java with graceful null return | YES |
+| 26 | flask-talisman installed and configured | YES |
+| 27 | All ZAP reports saved and committed | YES |
+| 28 | SECURITY.md complete with all sections | YES |
+
+**All 28 items complete! ✓**
+
+---
+
+### Team Sign-Off
+
+| Role | Name | Signed |
+|------|------|--------|
+| AI Developer 3 | InsharahMuallim | SIGNED — 2 May 2026 |
+| AI Developer 1 | Team Member | Pending |
+| AI Developer 2 | Team Member | Pending |
+| Java Developer 1 | Team Member | Pending |
+| Java Developer 2 | Team Member | Pending |
+| Java Developer 3 | Team Member | Pending |
+
+---
+
+### Demo Day Security Talking Points
+
+**1. JWT Authentication (Java Backend)**
+Spring Security enforces JWT on all endpoints. Requests without a valid token receive HTTP 401.
+
+**2. Rate Limiting (Flask AI Service)**
+flask-limiter blocks any IP sending more than 30 requests per minute. The /generate-report endpoint has a stricter limit of 10 requests per minute.
+
+**3. Input Sanitisation**
+All user input is sanitised before reaching the AI. HTML tags are stripped and 15+ prompt injection patterns are detected and blocked with HTTP 400.
+
+**4. OWASP ZAP Results**
+Three rounds of ZAP scanning conducted. Zero Critical or High findings remain. All Medium findings resolved using flask-talisman security headers.
+
+---
+
+*SECURITY.md Final Version — Day 15 — 2 May 2026 | AI Developer 3*
